@@ -25,7 +25,7 @@ class Account(object):
         self.ssl = ssl
 
     def send(self, emails):
-        if emails.__class__ == Email:
+        if isinstance(emails, Email):
             emails = [emails]
         if len([e for e in emails if e.__class__ != Email]):
             raise TypeError('emails must be Email or list of Email instances')
