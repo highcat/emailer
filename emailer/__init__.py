@@ -49,7 +49,11 @@ class Account(object):
             email.normalize_email_list('cc')
             mime1, mime2 = email.mimetype.split('/')
             mainpart = MIMEBase(mime1, mime2)
-            mainpart.set_param('charset', 'utf-8')
+            if email.force_7bit:
+                mainpart.set_param('charset', 'ascii')
+            else:
+                mainpart.set_param('charset', 'utf-8')
+
             if len(email.attachments):
                 message = MIMEMultipart(
                             'related' if len(email.attachments) else 'mixed')
@@ -74,7 +78,10 @@ class Account(object):
             subject = email.subject.encode('utf-8')
             message['Subject'] = Header(subject, r if is7bit(subject) else c)
 
-            body = email.body.encode('utf-8')
+            if email.force_7bit:
+                body = email.body.encode('ascii', 'xmlcharrefreplace')
+            else:
+                body = email.body.encode('utf-8')
             mainpart.set_payload(body)
 
             if is7bit(body):
@@ -118,13 +125,14 @@ class Account(object):
         smtp.quit()
 
 class Email(object):
-    def __init__(self, rcpt, subject, body, mimetype='text/plain', cc=[], attachments=[]):
+    def __init__(self, rcpt, subject, body, mimetype='text/plain', cc=[], attachments=[], force_7bit=False):
         self.rcpt = rcpt
         self.cc = cc
         self.subject = subject
         self.body = body
         self.mimetype = mimetype
         self.attachments = attachments
+        self.force_7bit = force_7bit
 
     def normalize_email_list(self, attr):
         emails = self.__getattribute__(attr)
