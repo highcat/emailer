@@ -49,9 +49,7 @@ class Account(object):
             email.normalize_email_list('cc')
             mime1, mime2 = email.mimetype.split('/')
             mainpart = MIMEBase(mime1, mime2)
-            if email.force_7bit:
-                mainpart.set_param('charset', 'ascii')
-            else:
+            if not email.force_7bit:
                 mainpart.set_param('charset', 'utf-8')
 
             if len(email.attachments):
