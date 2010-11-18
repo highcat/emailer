@@ -38,7 +38,6 @@ class Account(object):
         if self.login and self.password:
             smtp.login(self.login, self.password)
         for email in emails:
-            print "(%s) %s" % (type(email.subject), email.subject)
             c = Charset(email.charset)
             c.header_encoding = QP
             c.body_encoding = 0
@@ -75,7 +74,6 @@ class Account(object):
                 message['CC'] = email.get_emails_header('cc')
 
             subject = email.subject.encode(email.charset, 'xmlcharrefreplace')
-            print "(%s) %s" % (type(subject), subject)
             message['Subject'] = Header(subject, r if is7bit(subject) else c)
 
             if email.force_7bit:
