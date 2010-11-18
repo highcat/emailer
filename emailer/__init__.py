@@ -30,13 +30,6 @@ class Account(object):
         if len([e for e in emails if e.__class__ != Email]):
             raise TypeError('emails must be Email or list of Email instances')
 
-        c = Charset('utf-8')
-        c.header_encoding = QP
-        c.body_encoding = 0
-        r = Charset('utf-8')
-        r.header_encoding = 0
-        r.body_encoding = 0
-
         smtpclass = SMTP_SSL if self.ssl else SMTP
         if self.server == 'localhost':
             smtp = smtpclass(self.server)
@@ -45,12 +38,20 @@ class Account(object):
         if self.login and self.password:
             smtp.login(self.login, self.password)
         for email in emails:
+            print "(%s) %s" % (type(email.subject), email.subject)
+            c = Charset(email.charset)
+            c.header_encoding = QP
+            c.body_encoding = 0
+            r = Charset(email.charset)
+            r.header_encoding = 0
+            r.body_encoding = 0
+
             email.normalize_email_list('rcpt')
             email.normalize_email_list('cc')
             mime1, mime2 = email.mimetype.split('/')
             mainpart = MIMEBase(mime1, mime2)
             if not email.force_7bit:
-                mainpart.set_param('charset', 'utf-8')
+                mainpart.set_param('charset', email.charset)
 
             if len(email.attachments):
                 message = MIMEMultipart(
@@ -64,7 +65,7 @@ class Account(object):
                 '%a, %d %b %Y %H:%M:%S') + (" +%04d" % (time.timezone/-36,))
 
             h = Header()
-            fromname = self.fromname.encode('utf-8')
+            fromname = self.fromname.encode(email.charset, 'xmlcharrefreplace')
             h.append(fromname, r if is7bit(fromname) else c)
             h.append('<%s>' % self.email, r)
             message['From'] = h
@@ -73,13 +74,14 @@ class Account(object):
             if len(email.cc):
                 message['CC'] = email.get_emails_header('cc')
 
-            subject = email.subject.encode('utf-8')
+            subject = email.subject.encode(email.charset, 'xmlcharrefreplace')
+            print "(%s) %s" % (type(subject), subject)
             message['Subject'] = Header(subject, r if is7bit(subject) else c)
 
             if email.force_7bit:
                 body = email.body.encode('ascii', 'xmlcharrefreplace')
             else:
-                body = email.body.encode('utf-8')
+                body = email.body.encode(email.charset, 'xmlcharrefreplace')
             mainpart.set_payload(body)
 
             if is7bit(body):
@@ -123,7 +125,7 @@ class Account(object):
         smtp.quit()
 
 class Email(object):
-    def __init__(self, rcpt, subject, body, mimetype='text/plain', cc=[], attachments=[], force_7bit=False):
+    def __init__(self, rcpt, subject, body, mimetype='text/plain', cc=[], attachments=[], charset='utf-8', force_7bit=False):
         self.rcpt = rcpt
         self.cc = cc
         self.subject = subject
@@ -131,6 +133,7 @@ class Email(object):
         self.mimetype = mimetype
         self.attachments = attachments
         self.force_7bit = force_7bit
+        self.charset = charset
 
     def normalize_email_list(self, attr):
         emails = self.__getattribute__(attr)
@@ -148,10 +151,10 @@ class Email(object):
         self.__setattr__(attr, emails)
 
     def get_emails_header(self, attr):
-        c = Charset('utf-8')
+        c = Charset(self.charset)
         c.header_encoding = QP
         c.body_encoding = 0
-        r = Charset('utf-8')
+        r = Charset(self.charset)
         r.header_encoding = 0
         r.body_encoding = 0
 
@@ -166,7 +169,7 @@ class Email(object):
                 h.append(',', r)
 
             if name:
-                name = name.encode('utf-8')
+                name = name.encode(self.charset, 'xmlcharrefreplace')
                 h.append(name, r if is7bit(name) else c)
                 h.append('<%s>' % email, r)
             else:
