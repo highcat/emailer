@@ -7,6 +7,7 @@ from email.charset import Charset, QP
 from email.encoders import encode_quopri, encode_base64
 from mimetypes import guess_type
 from smtplib import SMTP, SMTP_SSL
+from poplib import POP3_SSL, POP3
 
 def is7bit(s):
     for c in s:
@@ -15,14 +16,36 @@ def is7bit(s):
     return True
 
 class Account(object):
-    def __init__(self, email, fromname, server, login=None, password=None, port=25, ssl=False):
+    def __init__(self, email, fromname, server, popserver = None, login=None, password=None, port=25, ssl=False):
         self.email = email
         self.fromname = fromname
         self.server = server
+        self.popserver = popserver
         self.port = port
         self.login = login
         self.password = password
         self.ssl = ssl
+        self.__pop = None
+    
+    def __pop_connect(self):
+        self.__pop = globals().get('POP3' + ('_SSL' if self.ssl else ''))(self.popserver)
+        self.__pop.user(self.login)
+        self.__pop.pass_(self.password)
+
+    def stat(self):
+        if not self.__pop:
+            self.__pop_connect()
+        return self.__pop.stat()
+
+    def retr(self, n):
+        if not self.__pop:
+            self.__pop_connect()
+        return self.__pop.retr(n)
+
+    def dele(self, n):
+        if not self.__pop:
+            self.__pop_connect()
+        return self.__pop.dele(n)
 
     def send(self, emails):
         if isinstance(emails, Email):
