@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEBase, MIMEMultipart
 from email.header import Header
 from email.charset import Charset, QP
 from email.encoders import encode_quopri, encode_base64
+from email.parser import Parser
 from mimetypes import guess_type
 from smtplib import SMTP, SMTP_SSL
 from poplib import POP3_SSL, POP3
@@ -40,7 +41,8 @@ class Account(object):
     def retr(self, n):
         if not self.__pop:
             self.__pop_connect()
-        return self.__pop.retr(n)
+        p = Parser()
+        return p.parsestr('\r\n'.join(self.__pop.retr(n)[1]))
 
     def dele(self, n):
         if not self.__pop:
