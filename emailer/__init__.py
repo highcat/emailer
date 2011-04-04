@@ -123,7 +123,7 @@ class Account(object):
                         mimetype = 'application/octet-stream'
                 mime1, mime2 = mimetype.split('/')
                 part = MIMEBase(mime1, mime2)
-                part.set_param('name', attachment.filename)
+                part.set_param('name', attachment.filename.encode('utf-8'), charset = 'utf-8')
 
                 del part['mime-version']
 
@@ -131,8 +131,10 @@ class Account(object):
                     part['Content-Disposition'] = 'inline'
                 else:
                     part['Content-Disposition'] = 'attachment'
-                part.set_param('filename', attachment.filename,
-                                                'Content-Disposition')
+                part.set_param('filename',
+                               attachment.filename.encode('utf-8'),
+                               'Content-Disposition',
+                               charset = 'utf-8')
 
                 if attachment.id:
                     part['Content-ID'] = '<%s>' % attachment.id
@@ -202,7 +204,7 @@ class Email(object):
 
 class Attachment(object):
     def __init__(self, filename, content, id=None, mimetype=None):
-        self.filename = filename
+        self.filename = filename if isinstance(filename, unicode) else unicode(filename)
         self.content = content
         self.mimetype = mimetype
         self.id = id
