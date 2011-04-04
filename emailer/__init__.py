@@ -123,18 +123,29 @@ class Account(object):
                         mimetype = 'application/octet-stream'
                 mime1, mime2 = mimetype.split('/')
                 part = MIMEBase(mime1, mime2)
-                part.set_param('name', attachment.filename.encode('utf-8'), charset = 'utf-8')
 
+                # using newer rfc2231 (not supported by Outlook):
+                # part.set_param('name', attachment.filename.encode('utf-8'), charset = 'utf-8')
+
+                # hack: using deprecated rfc2047 - supported by Outlook:
+                part.set_param('name', str(Header(attachment.filename)))
                 del part['mime-version']
 
                 if attachment.id:
                     part['Content-Disposition'] = 'inline'
                 else:
                     part['Content-Disposition'] = 'attachment'
+
+                # using newer rfc2231 (not supported by Outlook):
+                # part.set_param('filename',
+                #                attachment.filename.encode('utf-8'),
+                #                'Content-Disposition',
+                #                charset = 'utf-8')
+
+                # hack: using deprecated rfc2047 - supported by Outlook:
                 part.set_param('filename',
-                               attachment.filename.encode('utf-8'),
-                               'Content-Disposition',
-                               charset = 'utf-8')
+                               str(Header(attachment.filename)),
+                               'Content-Disposition')
 
                 if attachment.id:
                     part['Content-ID'] = '<%s>' % attachment.id
