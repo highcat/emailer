@@ -78,8 +78,7 @@ class Account(object):
                 mainpart.set_param('charset', email.charset)
 
             if len(email.attachments):
-                message = MIMEMultipart(
-                            'related' if len(email.attachments) else 'mixed')
+                message = MIMEMultipart('mixed')
                 message.attach(mainpart)
                 del mainpart['mime-version']
             else:
