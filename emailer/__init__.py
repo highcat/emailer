@@ -72,6 +72,7 @@ class Account(object):
 
             email.normalize_email_list('rcpt')
             email.normalize_email_list('cc')
+            email.normalize_email_list('bcc')
             mime1, mime2 = email.mimetype.split('/')
             mainpart = MIMEBase(mime1, mime2)
             if not email.force_7bit:
@@ -96,6 +97,8 @@ class Account(object):
             message['To'] = email.get_emails_header('rcpt')
             if len(email.cc):
                 message['CC'] = email.get_emails_header('cc')
+            if len(email.bcc):
+                message['BCC'] = email.get_emails_header('bcc')
 
             subject = email.subject.encode(email.charset, 'xmlcharrefreplace')
             message['Subject'] = Header(subject, r if is7bit(subject) else c)
@@ -155,14 +158,16 @@ class Account(object):
                 message.attach(part)
 
             smtp.sendmail(self.email, [rcpt[1] for rcpt in email.rcpt] +
-                            [cc[1] for cc in email.cc], message.as_string())
+                          [cc[1] for cc in email.cc] +
+                          [bcc[1] for bcc in email.bcc], message.as_string())
 
         smtp.quit()
 
 class Email(object):
-    def __init__(self, rcpt, subject, body, mimetype='text/plain', cc=[], attachments=[], charset='utf-8', force_7bit=False):
+    def __init__(self, rcpt, subject, body, mimetype='text/plain', cc=[], bcc=[], attachments=[], charset='utf-8', force_7bit=False):
         self.rcpt = rcpt
         self.cc = cc
+        self.bcc = bcc
         self.subject = subject
         self.body = body
         self.mimetype = mimetype
