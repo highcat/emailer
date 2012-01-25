@@ -18,6 +18,7 @@ txt_attachment = Attachment(
 email = Email(
     rcpt = 'highcatland@gmail.com',
     subject = 'Emailer test',
+    reply_to = 'HighCat <highcatland@gmail.com>',
     body = '<html><body><h1>Test email</h1><p>Some text in paragraph</p><p>Attachment should exist - please check.</p></body></html>',
     mimetype = 'text/html',
     attachments = [txt_attachment],
