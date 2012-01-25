@@ -30,7 +30,7 @@ attach_content = attach_content.encode('utf-8')
 html_attachment = Attachment(
     filename = 'text2.html',
     content = attach_content,
-    charset = "utf-8",
+#    charset = "utf-8", # don't do this for hmtl, just use correct <meta> tag (or it will mess Outlook up)
     mimetype = "text/html",
     )
 
