@@ -19,13 +19,29 @@ txt_attachment = Attachment(
     )
 
 
+attach_content = u"""<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8" /></head>
+<body>
+    <p>Text file attachment</p>
+    <p>Just to test if it works</p>
+    <p>Русский язык должен быть в правильной кодирове</p>
+</body>"""
+attach_content = attach_content.encode('utf-8')
+
+html_attachment = Attachment(
+    filename = 'text2.html',
+    content = attach_content,
+    charset = "utf-8",
+    mimetype = "text/html",
+    )
+
+
 email = Email(
     rcpt = 'highcatland@gmail.com',
     subject = 'Emailer test',
     reply_to = 'HighCat <highcatland@gmail.com>',
-    body = '<html><body><h1>Test email</h1><p>Some text in paragraph</p><p>Attachment should exist - please check.</p></body></html>',
+    body = u'<html><body><h1>Test email</h1><p>Some text in paragraph</p><p>Attachment should exist - please check.</p><p>Юникодный текст (unicode text here).</p></body></html>',
     mimetype = 'text/html',
-    attachments = [txt_attachment],
+    attachments = [txt_attachment, html_attachment],
     )
 
 

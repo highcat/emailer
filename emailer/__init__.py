@@ -151,15 +151,16 @@ class Account(object):
                 part.set_param('filename',
                                str(Header(attachment.filename)),
                                'Content-Disposition')
-
                 if attachment.id:
                     part['Content-ID'] = '<%s>' % attachment.id
 
-                if attachment.charset:
-                    part.set_charset(attachment.charset)
-
                 part.set_payload(attachment.content)
                 encode_base64(part)
+
+                # Do this AFTER encode_base64(part), or Content-Transfer-Encoding header will duplicate,
+                # or even happen 2 times with different values.
+                if attachment.charset:
+                    part.set_charset(attachment.charset)
 
                 message.attach(part)
 
