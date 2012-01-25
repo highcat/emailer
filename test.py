@@ -8,9 +8,13 @@ account = Account(
     server='localhost',
     )
 
+attach_content = u"Text file attachment\n\nJust to test if it works\n\nРусский язык должен быть в правильной кодирове"
+attach_content = attach_content.encode('utf-8')
+
 txt_attachment = Attachment(
     filename = 'text.txt',
-    content = "Text file attachment\n\nJust to test if it works\n",
+    content = attach_content,
+    charset = "utf-8",
     mimetype = "text/plain",
     )
 

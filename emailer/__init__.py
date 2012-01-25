@@ -155,6 +155,9 @@ class Account(object):
                 if attachment.id:
                     part['Content-ID'] = '<%s>' % attachment.id
 
+                if attachment.charset:
+                    part.set_charset(attachment.charset)
+
                 part.set_payload(attachment.content)
                 encode_base64(part)
 
@@ -222,9 +225,10 @@ class Email(object):
         return h
 
 class Attachment(object):
-    def __init__(self, filename, content, id=None, mimetype=None):
+    def __init__(self, filename, content, id=None, mimetype=None, charset=None):
         self.filename = filename if isinstance(filename, unicode) else unicode(filename)
         self.content = content
         self.mimetype = mimetype
+        self.charset = charset
         self.id = id
 
