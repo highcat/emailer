@@ -88,7 +88,7 @@ class Account(object):
             message['Date'] = datetime.datetime.now().strftime(
                 '%a, %d %b %Y %H:%M:%S') + (" +%04d" % (time.timezone/-36,))
 
-            h = Header()
+            h = Header(maxlinelen=1000) # FIXME: what is correct max length?
             fromname = self.fromname.encode(email.charset, 'xmlcharrefreplace')
             h.append(fromname, r if is7bit(fromname) else c)
             h.append('<%s>' % self.email, r)
