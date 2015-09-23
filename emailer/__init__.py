@@ -17,7 +17,7 @@ def is7bit(s):
     return True
 
 class Account(object):
-    def __init__(self, email, fromname, server, popserver = None, login=None, password=None, port=25, ssl=False):
+    def __init__(self, email, fromname, server, popserver = None, login=None, password=None, port=25, ssl=False, tls=False):
         self.email = email
         self.fromname = fromname
         self.server = server
@@ -26,6 +26,7 @@ class Account(object):
         self.login = login
         self.password = password
         self.ssl = ssl
+        self.tls = tls
         self.__pop = None
     
     def __pop_connect(self):
@@ -60,6 +61,8 @@ class Account(object):
             smtp = smtpclass(self.server)
         else:
             smtp = smtpclass(self.server, self.port)
+        if self.tls:
+            smtp.starttls()
         if self.login and self.password:
             smtp.login(self.login, self.password)
         for email in emails:
